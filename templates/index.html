@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Agendamento de Consultas</title>
+</head>
+<body>
+    <h1>Sistema de Agendamento</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <hr>
+
+    <h2>Agendar Nova Consulta</h2>
+    <form action="/agendar" method="POST">
+        <label>Matrícula:</label>
+        <input type="number" name="matricula" required><br><br>
+        
+        <label>Nome do Paciente:</label>
+        <input type="text" name="nome" required><br><br>
+        
+        <label>Especialidade:</label>
+        <input type="text" name="especialidade" required><br><br>
+        
+        <label>Data e Hora:</label>
+        <input type="datetime-local" name="data_consulta" required><br><br>
+        
+        <button type="submit">Agendar na Árvore</button>
+    </form>
+
+    <hr>
+
+    <h2>Buscar Paciente</h2>
+    <form action="/buscar" method="GET">
+        <label>Matrícula:</label>
+        <input type="number" name="matricula" required>
+        <button type="submit">Buscar na Árvore</button>
+    </form>
+
+    <hr>
+
+    <h2>Cancelar Consulta (Remover da Árvore)</h2>
+    <form action="/cancelar" method="POST">
+        <label>Matrícula do Paciente:</label>
+        <input type="number" name="matricula" required>
+        <button type="submit">
+            Remover Paciente
+        </button>
+    </form>
+
+    {% if paciente %}
+        <h3>Dados da Consulta:</h3>
+        <p><strong>Matrícula:</strong> {{ paciente.matricula }}</p>
+        <p><strong>Nome:</strong> {{ paciente.nome }}</p>
+        <p><strong>Especialidade:</strong> {{ paciente.especialidade }}</p>
+        <p><strong>Data:</strong> {{ paciente.data_consulta }}</p>
+    {% endif %}
+
+    <br><hr>
+    <a href="/debug" target="_blank">Ver Estrutura Interna da Árvore (JSON)</a>
+
+</body>
+</html>
