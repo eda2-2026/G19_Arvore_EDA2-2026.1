@@ -1,9 +1,11 @@
 class No:
-    def __init__(self, matricula, nome, especialidade, data_consulta):
-        self.matricula = matricula 
-        self.nome = nome
+    def __init__(self, nome, especialidade, data_consulta, cpf):
+
+        self.nome = nome.lower().strip() 
+        self.nome_original = nome.strip() 
         self.especialidade = especialidade
         self.data_consulta = data_consulta
+        self.cpf = cpf 
         self.cor = "VERMELHO"
         self.pai = None
         self.esq = None
@@ -12,7 +14,7 @@ class No:
 class ArvoreVermelhoPreto:
     def __init__(self):
 
-        self.NIL = No(0, "", "", "")
+        self.NIL = No("", "", "", 0)
         self.NIL.cor = "PRETO"
         self.NIL.esq = None
         self.NIL.dir = None
@@ -48,8 +50,8 @@ class ArvoreVermelhoPreto:
         y.dir = x
         x.pai = y
 
-    def inserir(self, matricula, nome, especialidade, data_consulta):
-        novo_no = No(matricula, nome, especialidade, data_consulta)
+    def inserir(self, nome, especialidade, data_consulta, cpf):
+        novo_no = No(nome, especialidade, data_consulta, cpf)
         novo_no.pai = None
         novo_no.esq = self.NIL
         novo_no.dir = self.NIL
@@ -59,7 +61,7 @@ class ArvoreVermelhoPreto:
 
         while x != self.NIL:
             y = x
-            if novo_no.matricula < x.matricula:
+            if novo_no.nome < x.nome:
                 x = x.esq
             else:
                 x = x.dir
@@ -67,7 +69,7 @@ class ArvoreVermelhoPreto:
         novo_no.pai = y
         if y == self.NIL:
             self.raiz = novo_no
-        elif novo_no.matricula < y.matricula:
+        elif novo_no.nome < y.nome:
             y.esq = novo_no
         else:
             y.dir = novo_no
@@ -85,57 +87,51 @@ class ArvoreVermelhoPreto:
         while k.pai.cor == "VERMELHO":
             if k.pai == k.pai.pai.esq:
                 tio = k.pai.pai.dir
-
                 if tio.cor == "VERMELHO":
                     tio.cor = "PRETO"
                     k.pai.cor = "PRETO"
                     k.pai.pai.cor = "VERMELHO"
                     k = k.pai.pai
                 else:
-
                     if k == k.pai.dir:
                         k = k.pai
                         self._rotacao_esquerda(k)
-
                     k.pai.cor = "PRETO"
                     k.pai.pai.cor = "VERMELHO"
                     self._rotacao_direita(k.pai.pai)
             else:
                 tio = k.pai.pai.esq
-
                 if tio.cor == "VERMELHO":
                     tio.cor = "PRETO"
                     k.pai.cor = "PRETO"
                     k.pai.pai.cor = "VERMELHO"
                     k = k.pai.pai
                 else:
-
                     if k == k.pai.esq:
                         k = k.pai
                         self._rotacao_direita(k)
-
                     k.pai.cor = "PRETO"
                     k.pai.pai.cor = "VERMELHO"
                     self._rotacao_esquerda(k.pai.pai)
-            
             if k == self.raiz:
                 break
-        
         self.raiz.cor = "PRETO"
 
-    def buscar(self, matricula):
-        return self._buscar_recursivo(self.raiz, matricula)
+    def buscar(self, nome):
 
-    def _buscar_recursivo(self, no, matricula):
-        if no == self.NIL or matricula == no.matricula:
+        nome_formatado = nome.lower().strip()
+        return self._buscar_recursivo(self.raiz, nome_formatado)
+
+    def _buscar_recursivo(self, no, nome):
+        if no == self.NIL or nome == no.nome:
             return no
-        
-        if matricula < no.matricula:
-            return self._buscar_recursivo(no.esq, matricula)
-        return self._buscar_recursivo(no.dir, matricula)
-    
-    def remover(self, matricula):
-        z = self.buscar(matricula)
+
+        if nome < no.nome:
+            return self._buscar_recursivo(no.esq, nome)
+        return self._buscar_recursivo(no.dir, nome)
+
+    def remover(self, nome):
+        z = self.buscar(nome)
         if z == self.NIL:
             return False
 
@@ -184,24 +180,20 @@ class ArvoreVermelhoPreto:
         while x != self.raiz and x.cor == "PRETO":
             if x == x.pai.esq:
                 w = x.pai.dir
-
                 if w.cor == "VERMELHO":
                     w.cor = "PRETO"
                     x.pai.cor = "VERMELHO"
                     self._rotacao_esquerda(x.pai)
                     w = x.pai.dir
-
                 if w.esq.cor == "PRETO" and w.dir.cor == "PRETO":
                     w.cor = "VERMELHO"
                     x = x.pai
                 else:
-
                     if w.dir.cor == "PRETO":
                         w.esq.cor = "PRETO"
                         w.cor = "VERMELHO"
                         self._rotacao_direita(w)
                         w = x.pai.dir
-
                     w.cor = x.pai.cor
                     x.pai.cor = "PRETO"
                     w.dir.cor = "PRETO"
@@ -214,18 +206,15 @@ class ArvoreVermelhoPreto:
                     x.pai.cor = "VERMELHO"
                     self._rotacao_direita(x.pai)
                     w = x.pai.esq
-
                 if w.dir.cor == "PRETO" and w.esq.cor == "PRETO":
                     w.cor = "VERMELHO"
                     x = x.pai
                 else:
-
                     if w.esq.cor == "PRETO":
                         w.dir.cor = "PRETO"
                         w.cor = "VERMELHO"
                         self._rotacao_esquerda(w)
                         w = x.pai.esq
-
                     w.cor = x.pai.cor
                     x.pai.cor = "PRETO"
                     w.esq.cor = "PRETO"
