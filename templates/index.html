@@ -2,70 +2,152 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Consultas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Sistema de Agendamento</h1>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul>
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-
-    <hr>
-
-    <h2>Agendar Nova Consulta</h2>
-    <form action="/agendar" method="POST">
-        <label>CPF:</label>
-        <input type="text" name="cpf" placeholder="000.000.000-00" required><br><br>
+    <div class="app">
         
-        <label>Nome do Paciente:</label>
-        <input type="text" name="nome" required><br><br>
-        
-        <label>Especialidade:</label>
-        <input type="text" name="especialidade" required><br><br>
-        
-        <label>Data e Hora:</label>
-        <input type="datetime-local" name="data_consulta" required><br><br>
-        
-        <button type="submit">Agendar na Árvore</button>
-    </form>
+        <aside class="menu">
+            <div class="topomenu">
+                <h2>Nova Consulta</h2>
+                <p>Insira os dados do paciente.</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="caixaaviso">
+                    {% for category, message in messages %}
+                        <div class="aviso {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
 
-    <hr>
+            <form action="/agendar" method="POST" class="form">
+                <div class="grupo">
+                    <label>CPF</label>
+                    <input type="text" name="cpf" placeholder="000.000.000-00" required>
+                </div>
+                <div class="grupo">
+                    <label>Nome Completo</label>
+                    <input type="text" name="nome" placeholder="Ex: Ana Silva" required>
+                </div>
+                <div class="grupo">
+                    <label>Especialidade</label>
+                    <input type="text" name="especialidade" placeholder="Ex: Cardiologia" required>
+                </div>
+                <div class="grupo">
+                    <label>Data e Hora</label>
+                    <input type="datetime-local" name="data_consulta" required>
+                </div>
+                <button type="submit" class="btnprin">Agendar Paciente</button>
+            </form>
+        </aside>
 
-    <h2>Buscar Paciente</h2>
-    <form action="/buscar" method="GET">
-        <label>Nome do Paciente:</label>
-        <input type="text" name="nome" required>
-        <button type="submit">Buscar</button>
-    </form>
+        <main class="principal">
+            
+            <div class="secaobusca">
+                <form action="/buscar" method="GET" class="formbusca">
+                    <div class="envolvebusca">
+                        <input type="text" name="nome" placeholder="Busque pacientes pelo nome..." value="{{ termo_busca }}">
+                    </div>
+                </form>
+            </div>
 
-    <hr>
+            <div class="listapac">
+                
+                <div class="topovista">
+                    <h3 class="titlista">Pacientes Agendados</h3>
+                    <div class="botoes">
+                        <button type="button" id="idlista" class="btnalt ativo" onclick="switchView('lista')">Modo Lista</button>
+                        <button type="button" id="idarvore" class="btnalt" onclick="switchView('arvore')">Modo Árvore</button>
+                    </div>
+                </div>
+                
+                <div id="vistalista" class="cartoes">
+                    {% if pacientes %}
+                        {% for p in pacientes %}
+                            <div class="cartao cor{{ p.cor|lower }}">
+                                <div class="info">
+                                    <div class="topoinfo">
+                                        <span class="nome">{{ p.nome }}</span>
+                                        <span class="cpf">CPF: {{ p.cpf }}</span>
+                                    </div>
+                                    <div class="tags">
+                                        <span class="tag tagespec">{{ p.especialidade }}</span>
+                                        <span class="tag tagdata">🗓️ {{ p.data_consulta }}</span>
+                                    </div>
+                                </div>
+                                <form action="/cancelar" method="POST" class="formdel">
+                                    <input type="hidden" name="nome" value="{{ p.nome }}">
+                                    <button type="submit" class="btndel" title="Remover">✕</button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="vazio">
+                            <p>Nenhum paciente encontrado.</p>
+                        </div>
+                    {% endif %}
+                </div>
 
-    <h2>Cancelar Consulta</h2>
-    <form action="/cancelar" method="POST">
-        <label>Nome do Paciente:</label>
-        <input type="text" name="nome" required>
-        <button type="submit">
-            Remover Paciente
-        </button>
-    </form>
+                <div id="vistaarvore" class="boxarvore" style="display: none;">
+                    <div class="arvore">
+                        {% macro render_tree(node) %}
+                            {% if node %}
+                                <li>
+                                    <a href="#" class="no no{{ node.cor|lower }}">{{ node.nome }}</a>
+                                    {% if node.esq or node.dir %}
+                                        <ul>
+                                            {% if node.esq %}
+                                                {{ render_tree(node.esq) }}
+                                            {% else %}
+                                                <li><a href="#" class="no nonil">NIL</a></li>
+                                            {% endif %}
+                                            
+                                            {% if node.dir %}
+                                                {{ render_tree(node.dir) }}
+                                            {% else %}
+                                                <li><a href="#" class="no nonil">NIL</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    {% endif %}
+                                </li>
+                            {% else %}
+                                <li><a href="#" class="no nonil">Árvore Vazia</a></li>
+                            {% endif %}
+                        {% endmacro %}
+                        
+                        <ul>
+                            {{ render_tree(arvore_dict) }}
+                        </ul>
+                    </div>
+                </div>
 
-    {% if paciente %}
-        <h3>Dados da Consulta:</h3>
-        <p><strong>CPF:</strong> {{ paciente.cpf }}</p>
-        <p><strong>Nome:</strong> {{ paciente.nome }}</p>
-        <p><strong>Especialidade:</strong> {{ paciente.especialidade }}</p>
-        <p><strong>Data:</strong> {{ paciente.data_consulta }}</p>
-    {% endif %}
+            </div>
 
-    <br><hr>
-    <a href="/debug" target="_blank">Ver Estrutura Interna da Árvore (JSON)</a>
+        </main>
+    </div>
+
+    <script>
+        function switchView(view) {
+            if (view === 'lista') {
+                document.getElementById('vistalista').style.display = 'flex';
+                document.getElementById('vistaarvore').style.display = 'none';
+                document.getElementById('idlista').classList.add('ativo');
+                document.getElementById('idarvore').classList.remove('ativo');
+            } else {
+                document.getElementById('vistalista').style.display = 'none';
+                document.getElementById('vistaarvore').style.display = 'block';
+                document.getElementById('idlista').classList.remove('ativo');
+                document.getElementById('idarvore').classList.add('ativo');
+            }
+        }
+    </script>
 
 </body>
 </html>

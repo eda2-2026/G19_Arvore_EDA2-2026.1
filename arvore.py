@@ -129,6 +129,36 @@ class ArvoreVermelhoPreto:
         if nome < no.nome:
             return self._buscar_recursivo(no.esq, nome)
         return self._buscar_recursivo(no.dir, nome)
+    
+    def buscar_parcial(self, prefixo):
+        prefixo_formatado = prefixo.lower().strip()
+        resultados = []
+        self._buscar_parcial_recursivo(self.raiz, prefixo_formatado, resultados)
+        return resultados
+
+    def _buscar_parcial_recursivo(self, no, prefixo, resultados):
+        if no == self.NIL:
+            return
+
+        if no.nome.startswith(prefixo):
+            resultados.append(no)
+            self._buscar_parcial_recursivo(no.esq, prefixo, resultados)
+            self._buscar_parcial_recursivo(no.dir, prefixo, resultados)
+        elif prefixo < no.nome:
+            self._buscar_parcial_recursivo(no.esq, prefixo, resultados)
+        else:
+            self._buscar_parcial_recursivo(no.dir, prefixo, resultados)
+
+    def obter_todos(self):
+        resultados = []
+        self._in_order(self.raiz, resultados)
+        return resultados
+
+    def _in_order(self, no, resultados):
+        if no != self.NIL:
+            self._in_order(no.esq, resultados)
+            resultados.append(no)
+            self._in_order(no.dir, resultados)
 
     def remover(self, nome):
         z = self.buscar(nome)
@@ -221,3 +251,17 @@ class ArvoreVermelhoPreto:
                     self._rotacao_direita(x.pai)
                     x = self.raiz
         x.cor = "PRETO"
+
+    def obter_dicionario(self):
+        return self._obter_dicionario_recursivo(self.raiz)
+
+    def _obter_dicionario_recursivo(self, no):
+        if no == self.NIL:
+            return None
+            
+        return {
+            'nome': no.nome_original,
+            'cor': no.cor,
+            'esq': self._obter_dicionario_recursivo(no.esq),
+            'dir': self._obter_dicionario_recursivo(no.dir)
+        }
