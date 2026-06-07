@@ -10,7 +10,7 @@ Conteúdo da Disciplina: Árvores<br>
 
 ## Vídeo de Apresentação
 
-* 
+* https://youtu.be/28arcGtXIxM
 
 ## Sobre 
 
